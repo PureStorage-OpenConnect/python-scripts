@@ -1,0 +1,7 @@
+{
+    "id": "python-scripts",
+    "filter": "devops",
+    "image": "http://code.purestorage.com/images/microsoft-azure.png",
+    "featured": 4,
+    "priority": 3
+}
