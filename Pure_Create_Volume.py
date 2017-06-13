@@ -15,7 +15,7 @@ from operator import itemgetter, attrgetter
 
 # Global Variables
 VERSION = '1.0.0'
-HEADER = 'Pure Storage Simple List Volumes (' + VERSION + ')'
+HEADER = 'Pure Storage Create Volume (' + VERSION + ')'
 BANNER = ('=' * 100)
 DEBUG_LEVEL = 0
 VERBOSE_FLAG = False
