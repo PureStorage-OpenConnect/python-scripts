@@ -3,7 +3,7 @@
 #
 ## Overview
 #
-# This short Python example illustrates how to build a simple PRTG custom sendor to monitor
+# This short Python example illustrates how to build a simple PRTG custom sensor to monitor
 # Pure Storage FlashArrays. The Pure Storage Python REST Client is used to query the FlashArray 
 # to get the basic performance counters.
 #
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     params = json.loads(data['params'])
     result = CustomSensorResult("Pure Storage performance info")
     urllib3.disable_warnings()
-    # gat basic statistics from the FlashArray specified in the json object
+    # get basic statistics from the FlashArray specified in the json object
     fa = purestorage.FlashArray(params['addr'], api_token=params['api_token'])
     fainfo = fa.get(action='monitor')
     fa.invalidate_cookie()
