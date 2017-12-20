@@ -130,8 +130,8 @@ def main():
         print(json.dumps(jsonData, sort_keys=False, indent=4))
     
  
-    volname = (jsonData['name'])
-    volsize = (jsonData['size'])
+    name = (jsonData['name'])
+    size = (jsonData['size'])
     cdate = (jsonData['created'])
 
     c1 = cdate[0:10]
@@ -141,7 +141,7 @@ def main():
     created = strftime('%d/%m/%Y %H:%M:%S', c4)
 
     print('{0:20} {1:>20} {2:20}'.format('Name', 'Size', 'Created'))
-    print('{0:20} {1:20} {2:20}'.format(volname, volsize, created))
+    print('{0:20} {1:20} {2:20}'.format(name, size, created))
 
     # Close API session
     array.invalidate_cookie()
