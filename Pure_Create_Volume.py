@@ -14,9 +14,9 @@ from time import gmtime, strftime, strptime
 from operator import itemgetter, attrgetter
 
 # Global Variables
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 HEADER = 'Pure Storage Create Volume (' + VERSION + ')'
-BANNER = ('=' * 100)
+BANNER = ('=' * 132)
 DEBUG_LEVEL = 0
 VERBOSE_FLAG = False
 COOKIE = ''
@@ -52,7 +52,7 @@ def parsecl():
                       dest = 'flashArray',
                       help = 'Pure FlashArray')
         
-    parser.add_option('--size',
+    parser.add_option('-S', '--size',
                       action = 'store',
                       type = 'string',
                       dest = 'size',
@@ -70,7 +70,7 @@ def parsecl():
                   default = False,
                   help = 'Verbose [default: %default]')
 
-    parser.add_option('--volume',
+    parser.add_option('-V', '--volume',
                       action = 'store',
                       dest = 'volume',
                       default = False,
@@ -116,7 +116,7 @@ def main():
 
     print(BANNER)
     print(HEADER + ' - ' + flashArray)
-    print(strftime('%Y/%m/%d %H:%M:%S %Z', gmtime()))
+    print(strftime('%d/%m/%Y %H:%M:%S %Z', gmtime()))
     print(BANNER)
 
     # Create session
@@ -125,16 +125,29 @@ def main():
     # Create Volume
     jsonData = array.create_volume(volume, size=volsize)
 
-    #jsonData = array.list_volumes()
     if VERBOSE_FLAG:
         print(BANNER)
         print(json.dumps(jsonData, sort_keys=False, indent=4))
+    
+ 
+    volname = (jsonData['name'])
+    volsize = (jsonData['size'])
+    cdate = (jsonData['created'])
+
+    c1 = cdate[0:10]
+    c2 = cdate[11:19]
+    c3 = c1 + ' ' + c2
+    c4 = strptime(c3,'%Y-%m-%d %H:%M:%S')
+    created = strftime('%d/%m/%Y %H:%M:%S', c4)
+
+    print('{0:20} {1:>20} {2:20}'.format('Name', 'Size', 'Created'))
+    print('{0:20} {1:20} {2:20}'.format(volname, volsize, created))
 
     # Close API session
     array.invalidate_cookie()
 
     print(BANNER)
-    print(strftime('%Y/%m/%d %H:%M:%S %Z', gmtime()))
+    print(strftime('%d/%m/%Y %H:%M:%S %Z', gmtime()))
     print(BANNER)
     sys.exit(exit_code)
 
