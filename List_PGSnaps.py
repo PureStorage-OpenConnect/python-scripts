@@ -13,9 +13,9 @@ from time import gmtime, strftime, strptime
 from operator import itemgetter, attrgetter
 
 # Global Variables
-VERSION = '1.1.0'
-HEADER = 'Pure Storage List Volumes (' + VERSION + ')'
-BANNER = ('=' * 102)
+VERSION = '1.0.0'
+HEADER = 'Pure Storage List Protection Group Snapshots (' + VERSION + ')'
+BANNER = ('=' * 132)
 DEBUG_LEVEL = 0
 VERBOSE_FLAG = False
 COOKIE = ''
@@ -97,7 +97,8 @@ def create_session(flashArray, user, password, api_token):
         print(json.dumps(jsonData, sort_keys=False, indent=4))
 
     name = (jsonData['username'])
-    print('Welcome', name)
+    welcome = 'Welcome ' + name
+    print(welcome)
 
 
 def post_url(flashArray,path,params):
@@ -146,14 +147,25 @@ def get_url(flashArray,path,params):
     return(jsonData)
 
 
-def list_volumes(flashArray):
+def list_pgsnaps(flashArray,pgroup,limit):
     data = ''
     params = json.dumps(data)
     
-    path = '/api/1.12/volume?space=true'
-    
+    if pgroup != '':
+        path = '/api/1.12/pgroup?names=%s&snap=true&sort=created-&limit=%s'%(pgroup,limit)
+    else:
+        path = '/api/1.12/pgroup?snap=true&sort=created-&limit=%s'%(limit)
+
     # Perform action
     jsonData = get_url(flashArray,path,params)
+
+    r =  str(jsonData)
+
+    if (r[3:15]) == 'pure_err_key':
+        pure_err_code = jsonData[0]['pure_err_code']
+        msg = 'Exiting: ' + pgroup + ' ' + jsonData[0]['msg']
+        print(BANNER)
+        sys.exit(msg)
 
     if VERBOSE_FLAG:
         print(BANNER)
@@ -163,36 +175,34 @@ def list_volumes(flashArray):
     res = len(jsonData)
 
     if res == 0:
-        print('No Volumes found')
+        print('No Snaps found')
     else:
         x = 0
         print(BANNER)
-        print('{0:60} {1:>20} {2:>20}'.format('Volume Name', 'Size (GB)', 'Used (GB)'))
+        print('{0:40} {1:60} {2:20}'.format('Source', 'Snap Name', 'Created'))
         print(BANNER)
         while (x<res):
             #
+            source = (jsonData[x]['source'])
             name = (jsonData[x]['name'])
-            size = (jsonData[x]['size'])
-            used = (jsonData[x]['volumes'])
+            cdate = (jsonData[x]['created'])
+            c1 = cdate[0:10]
+            c2 = cdate[11:19]
+            c3 = c1 + ' ' + c2
+
+            c4 = strptime(c3,'%Y-%m-%d %H:%M:%S')
+            created = strftime('%d/%m/%Y %H:%M:%S', c4)
             
-            sz = float(size)
-            us = float(used)
-            
-            sizegb = round((sz/1024/1024/104),2)
-            usedgb = round((us/1024/1024/104),2)
-            
-            print('{0:60} {1:20} {2:20}'.format(name, sizegb, usedgb))
+            print('{0:40} {1:60} {2:20}'.format(source, name, created))
  
             x = x + 1
-
 
 def parsecl():
     usage = 'usage: %prog [options]'
     version = '%prog ' + VERSION
-    description = "Please contact ron@purestorage.com for any assistance."
+    description = "This program returns Snapshots for given Protection Group. Please contact ron@purestorage.com for any assistance."
 
     parser = OptionParser(usage=usage, version=version, description=description)
-
 
     parser.add_option('-d', '--debug',
                       type = 'int',
@@ -200,11 +210,24 @@ def parsecl():
                       default = 0,
                       help = 'Debug level, used for HTTP debugging')
     
+    parser.add_option('-l', '--limit',
+                      type = 'int',
+                      dest = 'limit',
+                      default = 999,
+                      help = 'Limit number of responses [default: %default]')
+    
     parser.add_option('-p', '--password',
                       action = 'store',
                       type = 'string',
                       dest = 'password',
                       help = 'Pure password')
+     
+    parser.add_option('-P', '--pgroup',
+                      action = 'store',
+                      type = 'string',
+                      dest = 'pgroup',
+                      default = '',
+                      help = 'Protection Group')
      
     parser.add_option('-s', '--server',
                       action = 'store',
@@ -253,6 +276,8 @@ def main():
     password = options.password
     user = options.user
     flashArray = options.flashArray
+    limit = options.limit
+    pgroup = options.pgroup
     api_token = options.api_token
     DEBUG_LEVEL = options.DEBUG_LEVEL
     VERBOSE_FLAG = options.VERBOSE_FLAG
@@ -261,6 +286,8 @@ def main():
         print('Password', password)
         print('User', user)
         print('Flash Array', flashArray)
+        print('Protection Group', pgroup)
+        print('Limit', limit)
         print('Api Token', api_token)
         print('Debug Level:', DEBUG_LEVEL)
         print('Verbose Flag:', VERBOSE_FLAG)
@@ -282,7 +309,7 @@ def main():
     # Create session
     create_session(flashArray, user, password, api_token)
 
-    list_volumes(flashArray)
+    list_pgsnaps(flashArray,pgroup,limit)
 
     print(BANNER)
     print(strftime('%d/%m/%Y %H:%M:%S %Z', gmtime()))
