@@ -14,7 +14,7 @@ from time import gmtime, strftime, strptime
 from operator import itemgetter, attrgetter
 
 # Global Variables
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 HEADER = 'Pure Storage Copy Volume (' + VERSION + ')'
 BANNER = ('=' * 100)
 DEBUG_LEVEL = 0
@@ -40,6 +40,12 @@ def parsecl():
                       default = 0,
                       help = 'Debug level, used for HTTP debugging')
     
+    parser.add_option('-o', '--overwrite',
+                      action = 'store_true',
+                      dest = 'overwrite',
+                      default = False,
+                      help = 'Pure password [default: %default]')
+     
     parser.add_option('-p', '--password',
                       action = 'store',
                       type = 'string',
@@ -52,13 +58,13 @@ def parsecl():
                       dest = 'flashArray',
                       help = 'Pure FlashArray')
         
-    parser.add_option('--source',
+    parser.add_option('-S', '--source',
                       action = 'store',
                       type = 'string',
                       dest = 'sourcev',
                       help = 'Source Volume Name')
                       
-    parser.add_option('--target',
+    parser.add_option('-T', '--target',
                       action = 'store',
                       type = 'string',
                       dest = 'targetv',
@@ -71,10 +77,10 @@ def parsecl():
                       help = 'Pure user name')
 
     parser.add_option('-v', '--verbose',
-                  action = 'store_true',
-                  dest = 'VERBOSE_FLAG',
-                  default = False,
-                  help = 'Verbose [default: %default]')
+                      action = 'store_true',
+                      dest = 'VERBOSE_FLAG',
+                      default = False,
+                      help = 'Verbose [default: %default]')
 
     (options, args) = parser.parse_args()
 
@@ -97,6 +103,7 @@ def main():
     flashArray = options.flashArray
     sourcev = options.sourcev
     targetv = options.targetv
+    overwrite = options.overwrite
     DEBUG_LEVEL = options.DEBUG_LEVEL
     VERBOSE_FLAG = options.VERBOSE_FLAG
     
@@ -106,7 +113,9 @@ def main():
         print('Flash Array', flashArray)
         print('Source Volume name', sourcev)
         print('Target Volume name', targetv)
+        print('Overwrite', overwrite)
         print('Debug Level:', DEBUG_LEVEL)
+        print('Verbose Flag:', VERBOSE_FLAG)
 
     if flashArray == None:
         sys.exit('Exiting: You must provide FlashArray details')
@@ -123,14 +132,16 @@ def main():
     array = create_session(flashArray, user, password)
 
     # Create Volume
-    jsonData = array.copy_volume(sourcev, targetv)
+    jsonData = array.copy_volume(sourcev, targetv, overwrite=overwrite)
 
-    #jsonData = array.list_volumes()
     if VERBOSE_FLAG:
         print(BANNER)
         print(json.dumps(jsonData, sort_keys=False, indent=4))
 
-    print('Copied Volume ' + sourcev + ' To ' + targetv)
+    if overwrite == False:
+        print('Copied Volume ' + sourcev + ' To ' + targetv)
+    else:
+        print('Overwritten Volume ' + targetv + ' With ' + sourcev)
 
     # Close API session
     array.invalidate_cookie()
