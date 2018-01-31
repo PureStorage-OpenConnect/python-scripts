@@ -55,7 +55,7 @@ class PureFAoccpy(nagiosplugin.Resource):
         self.apitoken = apitoken
 
     def get_perf(self):
-        """Gets performance counters from flasharray."""
+        """Gets capacity counters from flasharray."""
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         fa = purestorage.FlashArray(self.endpoint, api_token=self.apitoken)
         fainfo = fa.get(space=True)[0]
