@@ -67,7 +67,7 @@ class PureFAoccpy(nagiosplugin.Resource):
         fainfo = self.get_perf()
         _log.debug('FA REST call returned "%s" ', fainfo)
         occupancy = round(float(fainfo.get('total'))/float(fainfo.get('capacity')), 2) * 100
-        metric = nagiosplugin.Metric('occupancy', occupancy, '%', min=0),
+        metric = nagiosplugin.Metric('occupancy', occupancy, '%', min=0, max=100)
         return metric
 
 
