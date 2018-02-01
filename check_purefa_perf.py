@@ -4,7 +4,8 @@
 ## Overview
 #
 # This short Nagios/Icinga plugin code shows  how to build a simple plugin to monitor Pure Storage FlashArrays.
-# The Pure Storage Python REST Client is used to query the FlashArray basic performance counters.
+# The Pure Storage Python REST Client is used to query the FlashArray performance counters. An optional parameter
+# allow to check a single volume instead than the whole flasharray
 # Plugin leverages the remarkably helpful nagiosplugin library by Christian Kauhaus.
 #
 ## Installation
@@ -31,11 +32,17 @@ __status__ = "Production"
 
    Nagios plugin to retrieve the six (6) basic KPIs from a Pure Storage FlashArray.
    Bandwidth counters (read/write), IOPs counters (read/write) and latency (read/write) are collected from the
+   The plugin has two mandatory arguments:  'endpoint', which specifies the target FA and 'apitoken', which
+   specifies the autentication token for the REST call session. A third optional parameter, 'volname' can
+   be used to check a specific named volume.
    target FA using the REST call.
-   Plugin accepts multiple warning and critical threshold parameters in a positional fashion
-
-
-
+   The plugin accepts multiple warning and critical threshold parameters in a positional fashion:
+      1st threshold refers to write latency
+      2nd threshold refers to read latency
+      3rd threshold refers to write bandwidth
+      4th threshold refers to read bandwidth
+      5th threshold refers to write IOPS
+      6th threshold refers to read IOPS
 
 """
 
@@ -56,15 +63,26 @@ class PureFAperf(nagiosplugin.Resource):
     metric objects
     """
 
-    def __init__(self, endpoint, apitoken):
+    def __init__(self, endpoint, apitoken, volname=None):
         self.endpoint = endpoint
         self.apitoken = apitoken
+        self.volname = volname
+
+    @property
+    def name(self):
+        if (self.volname is None):
+            return 'PURE_FA_PERF'
+        else:
+            return 'PURE_VOL_PERF'
 
     def get_perf(self):
         """Gets performance counters from flasharray."""
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         fa = purestorage.FlashArray(self.endpoint, api_token=self.apitoken)
-        fainfo = fa.get(action='monitor')[0]
+        if (self.volname is None):
+            fainfo = fa.get(action='monitor')[0]
+        else:
+            fainfo = fa.get_volume(self.volname, action='monitor')[0]
         fa.invalidate_cookie()
         return(fainfo)
 
@@ -78,13 +96,18 @@ class PureFAperf(nagiosplugin.Resource):
         rbw = int(fainfo.get('output_per_sec'))
         wiops = int(fainfo.get('writes_per_sec'))
         riops = int(fainfo.get('reads_per_sec'))
+        if (self.volname is None):
+            mlabel = 'FA '
+        else:
+            mlabel = self.volname + ' '
+
         metrics = [
-                    nagiosplugin.Metric('wlat', wlat, 'us', min=0),
-                    nagiosplugin.Metric('rlat', rlat, 'us', min=0),
-                    nagiosplugin.Metric('wbw', wbw, 'B/s', min=0),
-                    nagiosplugin.Metric('rbw', rbw, 'B/s', min=0),
-                    nagiosplugin.Metric('wiops', wiops, 'wr/s', min=0),
-                    nagiosplugin.Metric('riops', riops, 'rd/s', min=0)
+                    nagiosplugin.Metric(mlabel + 'wlat', wlat, 'us', min=0, context='wlat'),
+                    nagiosplugin.Metric(mlabel + 'rlat', rlat, 'us', min=0, context='wlat'),
+                    nagiosplugin.Metric(mlabel + 'wbw', wbw, 'B/s', min=0, context='wbw'),
+                    nagiosplugin.Metric(mlabel + 'rbw', rbw, 'B/s', min=0, context='rbw'),
+                    nagiosplugin.Metric(mlabel + 'wiops', wiops, 'wr/s', min=0, context='wiops'),
+                    nagiosplugin.Metric(mlabel + 'riops', riops, 'rd/s', min=0, context='riops')
                   ]
         return metrics
 
@@ -93,6 +116,7 @@ def parse_args():
     argp = argparse.ArgumentParser()
     argp.add_argument('endpoint', help="FA hostname or ip address")
     argp.add_argument('apitoken', help="FA api_token")
+    argp.add_argument('--vol', help="FA volme. If omitted the whole FA performance counters are checked")
     argp.add_argument('--tw', '--ttot-warning', metavar='RANGE[,RANGE,...]',
                       type=nagiosplugin.MultiArg, default='',
                       help="positional thresholds: write_latency, read_latenxy, write_bandwidth, read_bandwidth, write_iops, read_iops")
@@ -109,7 +133,7 @@ def parse_args():
 @nagiosplugin.guarded
 def main():
     args = parse_args()
-    check = nagiosplugin.Check( PureFAperf(args.endpoint, args.apitoken) )
+    check = nagiosplugin.Check( PureFAperf(args.endpoint, args.apitoken, args.vol) )
     check.add(nagiosplugin.ScalarContext('wlat', args.tw[0], args.tc[0]))
     check.add(nagiosplugin.ScalarContext('rlat', args.tw[1], args.tc[1]))
     check.add(nagiosplugin.ScalarContext('wbw', args.tw[2], args.tc[2]))
