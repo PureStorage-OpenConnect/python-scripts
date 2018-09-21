@@ -14,7 +14,7 @@ from operator import itemgetter, attrgetter
 
 # Global Variables
 VERSION = '1.1.0'
-API_VERSION = '1.12'
+DEFAULT_API_VERSION = '1.12'
 HEADER = 'Pure Storage List Volumes (' + VERSION + ')'
 BANNER = ('=' * 102)
 DEBUG_LEVEL = 0
@@ -276,6 +276,9 @@ def main():
 
     if flashArray == None:
         sys.exit('Exiting: You must provide FlashArray details')
+
+    if API_VERSION == None:
+        API_VERSION = DEFAULT_API_VERSION
 
     if api_token == None and user == None:
         sys.exit('Exiting: You must provide either API Token details or username and password')
