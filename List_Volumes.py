@@ -14,6 +14,7 @@ from operator import itemgetter, attrgetter
 
 # Global Variables
 VERSION = '1.1.0'
+API_VERSION = '1.12'
 HEADER = 'Pure Storage List Volumes (' + VERSION + ')'
 BANNER = ('=' * 102)
 DEBUG_LEVEL = 0
@@ -35,7 +36,7 @@ def create_session(flashArray, user, password, api_token):
                'username': password
                }
         params = json.dumps(data)
-        path = '/api/1.12/auth/apitoken'
+        path = '/api' + API_VERSION + '/auth/apitoken'
         url = 'https://%s%s'%(flashArray,path)
     
         # Perform action
@@ -66,7 +67,7 @@ def create_session(flashArray, user, password, api_token):
             }
     
     params = json.dumps(data)
-    path = '/api/1.12/auth/session'
+    path = '/api/'+ API_VERSION + '/auth/session'
     url = 'https://%s%s'%(flashArray,path)
 
     # Perform action
@@ -150,7 +151,7 @@ def list_volumes(flashArray):
     data = ''
     params = json.dumps(data)
     
-    path = '/api/1.12/volume?space=true'
+    path = '/api/' + API_VERSION + '/volume?space=true'
     
     # Perform action
     jsonData = get_url(flashArray,path,params)
@@ -218,6 +219,12 @@ def parsecl():
                       dest = 'api_token',
                       help = 'Pure Api Token')
 
+    parser.add_option('-V', '--apiversion',
+                      action = 'store',
+                      type = 'string',
+                      dest = 'API_VERSION',
+                      help = 'Pure FlashArray API Version')
+
     parser.add_option('-u', '--user',
                       action = 'store',
                       type = 'string',
@@ -246,6 +253,7 @@ def main():
     # Setup variables
     global DEBUG_LEVEL
     global VERBOSE_FLAG
+    global API_VERSION
     exit_code = 0
 
     # Check for command line parameters
@@ -256,6 +264,7 @@ def main():
     api_token = options.api_token
     DEBUG_LEVEL = options.DEBUG_LEVEL
     VERBOSE_FLAG = options.VERBOSE_FLAG
+    API_VERSION = options.API_VERSION
     
     if DEBUG_LEVEL != 0:
         print('Password', password)
