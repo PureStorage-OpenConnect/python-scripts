@@ -1,7 +1,8 @@
 {
     "id": "python-scripts",
+    "name": "Python SDKs sample scripts",
     "filter": "devops",
     "image": "http://code.purestorage.com/images/8_python%20script.png",
-    "featured": 0,
+    "featured": 1,
     "priority": 3
 }
