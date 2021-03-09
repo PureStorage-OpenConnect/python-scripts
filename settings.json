@@ -3,6 +3,6 @@
     "name": "Python SDKs sample scripts",
     "filter": "devops",
     "image": "http://code.purestorage.com/images/8_python%20script.png",
-    "featured": 1,
+    "featured": 0,
     "priority": 3
 }
