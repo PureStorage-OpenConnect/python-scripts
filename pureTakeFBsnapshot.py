@@ -1,6 +1,5 @@
-import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+import urllib3
+urllib3.disable_warnings()
 from base64 import b64encode
 import os
 import sys
@@ -14,7 +13,7 @@ from operator import itemgetter, attrgetter
 from purity_fb import PurityFb, FileSystem, FileSystemSnapshot, SnapshotSuffix, rest
 
 # Global Variables
-VERSION = '1.0.0'
+VERSION = '2.0.0'
 HEADER = 'Pure Storage Take FlashBlade Snapshot (' + VERSION + ')'
 BANNER = ('=' * 132)
 DEBUG_FLAG = False
@@ -24,7 +23,7 @@ COOKIE = ''
 def parsecl():
     usage = 'usage: %prog [options]'
     version = '%prog ' + VERSION
-    description = "This application has been developed using Pure Storage v1.8 RESTful Web Service interfaces. Developed and tested using Python 3.6.8. Please contact ron@purestorage.com for assistance."
+    description = "This application has been developed using Pure Storage v1.12 RESTful Web Service interfaces. Developed and tested using Python 3.9.5 Please contact ron@purestorage.com for assistance."
 
     parser = OptionParser(usage=usage, version=version, description=description)
 
@@ -41,12 +40,18 @@ def parsecl():
                       dest = 'fs',
                       help = 'FlashBlade File System')
         
+    parser.add_option('-r', '--replicant',
+                      action = 'store',
+                      type = 'string',
+                      dest = 'flashBladeRep',
+                      help = 'FlashBlade Replicant array')
+                      
     parser.add_option('-s', '--server',
                       action = 'store',
                       type = 'string',
                       dest = 'flashBlade',
                       help = 'FlashBlade array')
-        
+    
     parser.add_option('-t', '--token',
                       action = 'store',
                       type = 'string',
@@ -83,6 +88,7 @@ def main():
     options = parsecl()
     API_TOKEN = options.API_TOKEN
     flashBlade = options.flashBlade
+    flashBladeRep = options.flashBladeRep
     fs = options.fs
     suffix = options.suffix
     DEBUG_FLAG = options.DEBUG_FLAG
@@ -91,6 +97,7 @@ def main():
     if DEBUG_FLAG:
         print('API Token:', API_TOKEN)
         print('FlashBlade:', flashBlade)
+        print('Relplicant:', flashBladeRep)
         print('File System:', fs)
         print('Suffix:', suffix)
         print('Debug Flag:', DEBUG_FLAG)
@@ -98,7 +105,7 @@ def main():
 
     if flashBlade == None:
         sys.exit('Exiting: You must provide FlashBlade details')
-
+        
     if API_TOKEN == None:
         sys.exit('Exiting: You must provide FlashBlade API Token details')
 
@@ -123,14 +130,27 @@ def main():
 
     if res:
         try:
-            if suffix:
-                # create a snapshot with suffix for flashblade file system
-                res = fb.file_system_snapshots.create_file_system_snapshots(sources=[fs],
-                                                                            suffix=SnapshotSuffix(suffix))
+            if flashBladeRep:
+                if suffix:
+                  # create a snapshot with suffix and replicate to target array
+                  res = fb.file_system_snapshots.create_file_system_snapshots(sources=[fs],
+                                                                              suffix=SnapshotSuffix(suffix),
+                                                                              send=True,
+                                                                              targets=[flashBladeRep])
+                else:
+                  # create a snapshot without suffix and replicate to target array
+                  res = fb.file_system_snapshots.create_file_system_snapshots(sources=[fs],
+                                                                              send=True,
+                                                                              targets=[flashBladeRep])
             else:
-                # create a snapshot for the file system 
-                res = fb.file_system_snapshots.create_file_system_snapshots(sources=[fs])
-
+                if suffix:
+                  # create a snapshot with suffix for the file system
+                  res = fb.file_system_snapshots.create_file_system_snapshots(sources=[fs],
+                                                                             suffix=SnapshotSuffix(suffix))
+                else:
+                  # create a snapshot without suffix for the file system
+                  res = fb.file_system_snapshots.create_file_system_snapshots(sources=[fs])
+                
             if VERBOSE_FLAG:
                 print(res)
             
