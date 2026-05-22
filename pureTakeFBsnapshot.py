@@ -13,7 +13,7 @@ from operator import itemgetter, attrgetter
 from purity_fb import PurityFb, FileSystem, FileSystemSnapshot, SnapshotSuffix, rest
 
 # Global Variables
-VERSION = '2.0.0'
+VERSION = '2.1.0'
 HEADER = 'Everpure Take FlashBlade Snapshot (' + VERSION + ')'
 BANNER = ('=' * 132)
 DEBUG_FLAG = False
@@ -23,7 +23,7 @@ COOKIE = ''
 def parsecl():
     usage = 'usage: %prog [options]'
     version = '%prog ' + VERSION
-    description = "This application has been developed using Everpure v1.12 RESTful Web Service interfaces. Developed and tested using Python 3.9.5 Please contact ron@everpuredata.com for assistance."
+    description = "Tested with FlashBlade fine-grain granual RBAC support, availabile from Purity 4.8.1. To use FlashBlade REALMS, prefix File System with Real name, seperated with double-colon for example <<Realm Name>::<File System>. Please contact ron@everpuredata.com for assistance."
 
     parser = OptionParser(usage=usage, version=version, description=description)
 
