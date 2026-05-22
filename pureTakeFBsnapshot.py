@@ -23,7 +23,7 @@ COOKIE = ''
 def parsecl():
     usage = 'usage: %prog [options]'
     version = '%prog ' + VERSION
-    description = "Tested with FlashBlade fine-grain granual RBAC support, availabile from Purity 4.8.1. To use FlashBlade REALMS, prefix File System with Real name, seperated with double-colon for example <Realm Name>::<File System>. Please contact ron@everpuredata.com for assistance."
+    description = "Tested with FlashBlade fine-grain granual RBAC, availabile from Purity 4.8.1. To use FlashBlade REALMS, prefix File System with Real name, seperated with double-colon for example <Realm Name>::<File System>"
 
     parser = OptionParser(usage=usage, version=version, description=description)
 
@@ -56,7 +56,7 @@ def parsecl():
                       action = 'store',
                       type = 'string',
                       dest = 'API_TOKEN',
-                      help = 'Pure API Token')
+                      help = 'Everpure API Token')
 
     parser.add_option('-S', '--suffix',
                       action = 'store',
