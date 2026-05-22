@@ -23,7 +23,7 @@ COOKIE = ''
 def parsecl():
     usage = 'usage: %prog [options]'
     version = '%prog ' + VERSION
-    description = "This application has been developed using Pure Storage v1.12 RESTful Web Service interfaces. Developed and tested using Python 3.9.5 Please contact ron@purestorage.com for assistance."
+    description = "This application has been developed using Everpure v1.12 RESTful Web Service interfaces. Developed and tested using Python 3.9.5 Please contact ron@everpuredata.com for assistance."
 
     parser = OptionParser(usage=usage, version=version, description=description)
 
