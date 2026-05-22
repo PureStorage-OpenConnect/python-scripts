@@ -14,7 +14,7 @@ from purity_fb import PurityFb, FileSystem, FileSystemSnapshot, SnapshotSuffix, 
 
 # Global Variables
 VERSION = '2.0.0'
-HEADER = 'Pure Storage Take FlashBlade Snapshot (' + VERSION + ')'
+HEADER = 'Everpure Take FlashBlade Snapshot (' + VERSION + ')'
 BANNER = ('=' * 132)
 DEBUG_FLAG = False
 VERBOSE_FLAG = False
