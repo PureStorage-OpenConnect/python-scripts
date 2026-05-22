@@ -23,7 +23,7 @@ COOKIE = ''
 def parsecl():
     usage = 'usage: %prog [options]'
     version = '%prog ' + VERSION
-    description = "Tested with FlashBlade fine-grain granual RBAC, availabile from Purity 4.8.1. To use FlashBlade REALMS, prefix File System with Real name, seperated with double-colon for example <Realm Name>::<File System>"
+    description = "Tested with FlashBlade fine-grain granual RBAC, available from Purity 4.8.1. To use FlashBlade REALMS, prefix File System with Real name, seperated with double-colon for example <Realm Name>::<File System>"
 
     parser = OptionParser(usage=usage, version=version, description=description)
 
